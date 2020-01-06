@@ -2,6 +2,7 @@
 <html>
 <! THIS IS MY PAGE FOR  PROJECTS>
     <head>
+        <script type = "text/javascript" src="js/processing.js"></script>
     <! THIS IS METADATA AND WILL NOT ACTUALLY APPEAR ON MY WEBSITE PAGES>
         <title>Sophia's Website <3</title>
         <link rel="shortcut icon" type="image/png" href="https://www.johnnyseeds.com/dw/image/v2/BBBW_PRD/on/demandware.static/-/Sites-jss-master/default/dw2f79264c/images/products/flowers/01814_01_sunrichorangesum.jpg?sw=387&cx=302&cy=0&cw=1196&ch=1196"/>
@@ -16,13 +17,208 @@
             <nav>
                 <ul>
                     <li><a href="index.html">Home</a></li>
-                    <li class="current"><a href="projects.html">Projects</a></li>
+                    <li class="current"><a href="portfolio.html">Portfolio</a></li>
                     <li><a href="links.html">Links</a></li>
                     <li><a href="random.html">Random</a></li>
                 </ul>
             </nav>
         </header>
-        <h2>Projects !!</h2>
+        <h2>Portfolio !!</h2>
         <p>This is where my projects wil go!!</p>
+        <script type="text/processing">
+            PImage bg, fishy, topSeaweed, botSeaweed, start;
+            int bgx, bgy, fx,fy,g,Vfy;
+            int[] seaweedX, seaweedY; // declare two arrays
+            int gameState, score, highScore;
+            
+            void setup()
+            {
+              size(800,620);
+              bg=loadImage("./img/bg.png");
+              fishy=loadImage("./img/fishy.png");
+              botSeaweed=loadImage("./img/botSeaweed.png");
+              topSeaweed=loadImage("./img/topSeaweed.png");
+              start = loadImage("./img/start.png");
+              fx=100;
+              fy=50;
+              g=1;//g or gravity == speed of downward acceleation
+              seaweedX= new int[5];
+              seaweedY= new int[seaweedX.length];
+              //populate thearray w/ values
+              for(int i=0; i< seaweedX.length; i++)
+              {
+                seaweedX[i] = width+200*i;
+                seaweedY[i]=(int)random(-350,0);
+              }
+              gameState = -1;
+            }
+            
+            
+            //THE MAIN GAME LOOP
+            
+            void draw()
+            {
+              if(gameState == -1)
+              {
+                startScreen();
+              }
+              else if(gameState==0)
+              {
+                setBg();
+                setSeaweed();
+                setFishy();
+                setScore();
+              }
+              else
+              {
+                endScreen();
+                restart();
+              }
+            }
+            
+            void endScreen()
+            {
+              fill(115, 76, 255, 100);
+              if(mouseX > 90 && mouseX < 595 && mouseY > 150 && mouseY < 290)
+              {
+                fill(100, 250, 100, 100);
+              }
+              rect(90, 150, 505, 140, 5);
+              fill(0);
+              textSize(40);
+              text("Fishy Flopped     : (", 200,200);
+              text("Click HERE to Play Again!" , 100, 270);
+            }
+            
+            void restart()
+            {
+              //CHECK TO MAKE SURE THE MOUSE IS IN THE 'BOX'
+              if(mouseX > 90 && mouseX < 595 && mouseY > 150 && mouseY < 290)
+              {
+                //RESET AND RESTART
+                if(mousePressed)
+                {
+                  fy = height/2;
+                  for(int i = 0; i < seaweedX.length; i++)
+                  {
+                    seaweedX[i] = width + 200*i;
+                    seaweedY[i] = (int)random(-350, 0);
+                  }
+                  score = 0;
+                  gameState = 0;
+                }
+              }
+            }
+            
+            void startScreen()
+            {
+              image(start,0,0);
+              if(mousePressed)
+              {
+                fy = height/2;
+                gameState = 0;
+              }
+            }
+            
+            void setScore()
+            {
+              if(score>highScore)
+              {
+                highScore = score;
+              }
+              //Background for ScoreBoard
+              fill(160,160,160, 200); //Last# is opacity (Clearness)
+              rect(width-175, 10, 155, 80, 5);
+              fill(0);
+              textSize(32);
+              text("Score- " + score, width - 170, 40);
+              text("High-  " + highScore, width - 170, 80);
+            }
+            
+            void setSeaweed()
+            {
+              //Move the Pipes
+              for(int i = 0; i < seaweedX.length; i++)
+              {
+                image(topSeaweed, seaweedX[i], seaweedY[i]);
+                image(botSeaweed, seaweedX[i], seaweedY[i] + 670);
+                seaweedX[i]-= 2;
+                if(score > 10)
+                {
+                  seaweedX[i]-=1;  //Speed up when they reach 10 points
+                }
+                if(score > 20)
+                {
+                  seaweedX[i]-=1;  //Speed up again at 20 points
+                }
+                if(seaweedX[i] < -250)
+                {
+                  seaweedX[i] = width;
+                }
+                //Check for Collision
+                if(fx > (seaweedX[i]-69) && fx < seaweedX[i] + 114)
+                {
+                  //End Game is not in SAFE ZONE
+                  if(!(fy > seaweedY[i] + 414 && fy < seaweedY[i] + (414 + 256-50)))
+                  {
+                    fill(20, 0, 0, 20);
+                    textSize(16);
+                    rect(20, height - 223, 455, 32);
+                    fill(0);
+                    text("OH NO!!!! FISHY SWAM INTO A PIECE OF SEAWEED...", 20, height - 200);
+                    gameState = 1;
+                  }
+                  //Score if pass through pipe
+                  else if (fx==seaweedX[i] || fx == seaweedX[i] + 1)
+                  {
+                    score+=1;
+                  }
+                  else if(score > 10){
+                    if(fx==seaweedX[i] || fx == seaweedX[i] + 1 || fx == seaweedX[i] + 2)
+                    {
+                      score++;
+                    }
+                  }
+                }
+              }
+            }
+            
+            void setFishy()
+            {
+              image(fishy,fx,fy);
+              fy=fy+Vfy;
+              Vfy=Vfy+g;
+              if(fy > height || fy < 0)
+              {
+                fill(0);
+                rect(16, 18, 500, 40);
+                fill(255, 0, 0, 240);
+                textSize(16);
+                text("OH NO!!!! FISHY FELL OFF THE SCREEN...", 20, 44);
+                gameState=1;
+              }
+            }
+            void keyPressed()
+            {
+              Vfy = -15;
+            }
+            
+            void mousePressed()
+            {
+              Vfy=-15;
+            }
+            
+            void setBg()
+            {
+              image(bg,bgx,bgy);
+              image(bg,bgx+ bg.width, bgy);
+              bgx=bgx - 1;
+              if(bgx <-bg.width)
+              {
+                bgx=0;
+              }
+            }
+        </script>
+        <canvas id="sketch" style="border:1px solid black"></canvas>
     </body>
 </html>
